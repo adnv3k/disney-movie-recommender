@@ -83,7 +83,8 @@ class Recommendations():
         self.get_recc_count()
         self.reccs = []
         highest_count = max(self.recc_count.values())
-        list_length = 10
+        #TODO revise to have a more efficient way to get reccs by streaming provider.
+        list_length = 30
         while len(self.reccs) < list_length:
             for recc in self.recc_count:
                 if self.recc_count[recc] == highest_count:
@@ -91,7 +92,7 @@ class Recommendations():
                     if len(self.reccs) == list_length:
                         break
             highest_count -= 1
-        return self.reccs
+        return self.reccs[:10]
     
     def json(self):
         """Returns json of recommendations.
@@ -120,4 +121,27 @@ class Recommendations():
             add_recc['occurrence'] = int(occurrence)
             res['results'].append(add_recc)
         return res
+
+    def filter_streaming_availability(self, provider='Disney Plus', country='US'):
+        """Calls the provider availability endpoint and selects for US by defualt.
+
+        Args:
+            provider (_type_): _description_
+        """
+        # ['Reservoir Dogs (500) (Occurrence: 11)', 'Transformers (1858) (Occurrence: 9)', 'The Departed (1422) (Occurrence: 8)', 'Pulp Fiction (680) (Occurrence: 8)', '300 (1271) (Occurrence: 7)', 'Se7en (807) (Occurrence: 7)', 'TRON: Legacy (20526) (Occurrence: 6)', 'The A-Team (34544) (Occurrence: 6)', 'Hancock (8960) (Occurrence: 6)', 'Taken (8681) (Occurrence: 6)']
+        recc_by_avail = []
+        for recc in self.reccs:
+            if len(recc_by_avail) == 10:
+                break
+            movie_id = recc.split(" (")[1][:-1]
+            r = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/watch/providers?api_key={TMDB_KEY}")
+            results = r.json()["results"]
+            if results.get(country):
+                results = results[country]
+                if results.get("flatrate"):
+                    results = results['flatrate']
+                    for result in results:
+                        if result['provider_name'] == provider:
+                            recc_by_avail.append(recc)
+        return recc_by_avail
 

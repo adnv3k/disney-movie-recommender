@@ -15,7 +15,7 @@ movie_list = [
     "Harry Potter",
     "The Wolf of Wall Street"
 ]
-
 recc = Recommendations(movie_list)
 print(recc.get_reccs())
 print(recc.json())
+print(recc.filter_streaming_availability(provider="Netflix"))
