@@ -12,6 +12,7 @@ GENRE_LEGEND = {'28': 'Action', '12': 'Adventure', '16': 'Animation', '35': 'Com
                 '878': 'Science Fiction', '10770': 'TV Movie', '53': 'Thriller', '10752': 'War', 
                 '37': 'Western'}
 
+# TODO compare do most common keyword analysis using imdb and beautiful soup
 # Movie should be recorded with release year to help with search results
 
 class Recommendations():
@@ -84,15 +85,15 @@ class Recommendations():
         self.reccs = []
         highest_count = max(self.recc_count.values())
         #TODO revise to have a more efficient way to get reccs by streaming provider.
-        list_length = 30
-        while len(self.reccs) < list_length:
+        # while len(self.reccs) < list_length: #
+        while highest_count > 0:
             for recc in self.recc_count:
                 if self.recc_count[recc] == highest_count:
                     self.reccs.append(f'{recc} (Occurrence: {self.recc_count[recc]})')
-                    if len(self.reccs) == list_length:
-                        break
+                    # if len(self.reccs) == list_length:
+                    #     break
             highest_count -= 1
-        return self.reccs[:10]
+        return self.reccs[:10] # Return the top 10 reccs
     
     def json(self):
         """Returns json of recommendations.
