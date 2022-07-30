@@ -9,42 +9,48 @@ import time
 
 # error css selector: #email__error
 
-driver = webdriver.Chrome('browser/chromedriver.exe')
-action = ActionChains(driver)
-driver.get('https://disneyplus.com')
-t = time.time()
+class Browser:
+    def __init__(self, email, password, profile):
+        self.driver = webdriver.Chrome('chromedriver.exe')
+        self.email = email
+        self.password = password
+        self.profile = profile
+        self.action = ActionChains(self.driver)
+        self.time = time.time()
 
-# do login process
-try:
-    # set up explicit wait time and search for login button
-    login_btn = WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "body > header > nav.nav.pre-sticky > a > span"))
-    )
-    driver.find_element_by_css_selector('body > header > nav.nav.pre-sticky > a > span').click()
-    temp = open('temp.txt', 'r+').readlines()
-    email = temp[0]
-    pw = temp[1]
-    profile = 'Profile'
+    def start(self):
+        self.driver.get('https://disneyplus.com')
 
-    email_field = WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#email"))
-    )
-    driver.find_element_by_css_selector("#email").send_keys(email)
-    driver.find_element_by_css_selector("#dssLogin > div:nth-child(3) > button").click()
+    def login(self):
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "body > header > nav.nav.pre-sticky > a > span"))
+        )
+        try:
+            self.driver.find_element_by_css_selector('body > header > nav.nav.pre-sticky > a > span').click()
+            temp = open('temp.txt', 'r+').readlines()
+            self.email = temp[0]
+            self.password = temp[1]
 
-    pw_field = WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, "#password"))
-    )
-    driver.find_element_by_css_selector("#password").send_keys(pw)
-    driver.find_element_by_css_selector("#dssLogin > div > button").click()
+            WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#email"))
+            )
+            self.driver.find_element_by_css_selector("#email").send_keys(self.email)
+            self.driver.find_element_by_css_selector("#dssLogin > div:nth-child(3) > button").click()
 
-    WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located(
-            (By.CSS_SELECTOR, "#remove-main-padding_index > div > div > section > ul > div:nth-child(2) > div > h3"))
-    )
-    prof = driver.find_element_by_css_selector(f"div[aria-label='{profile}']")
-    action.move_to_element(prof).click(prof).perform()
+            WebDriverWait(self.driver, 15).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#password"))
+            )
+            self.driver.find_element_by_css_selector("#password").send_keys(self.password)
+            self.driver.find_element_by_css_selector("#dssLogin > div > button").click()
 
-except Exception as e:
-    print(e)
-    driver.get_screenshot_as_file(f'errors/{str(round(t))}.png')
+        except Exception as e:
+            print(e)
+            self.driver.get_screenshot_as_file(f'errors/{str(round(self.time))}.png')
+
+    def profile(self):
+        WebDriverWait(self.driver, 15).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "#remove-main-padding_index > div > div > section > ul > div:nth-child(2) > div > h3")))
+        prof = self.driver.find_element_by_css_selector(f"div[aria-label='{self.profile}']")
+        self.action.move_to_element(prof).click(prof).perform()
+
