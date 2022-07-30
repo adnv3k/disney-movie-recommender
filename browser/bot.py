@@ -23,8 +23,7 @@ class Browser:
 
     def login(self):
         WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "body > header > nav.nav.pre-sticky > a > span"))
-        )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "body > header > nav.nav.pre-sticky > a > span")))
         try:
             self.driver.find_element_by_css_selector('body > header > nav.nav.pre-sticky > a > span').click()
             temp = open('temp.txt', 'r+').readlines()
@@ -32,14 +31,12 @@ class Browser:
             self.password = temp[1]
 
             WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#email"))
-            )
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#email")))
             self.driver.find_element_by_css_selector("#email").send_keys(self.email)
             self.driver.find_element_by_css_selector("#dssLogin > div:nth-child(3) > button").click()
 
             WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "#password"))
-            )
+                EC.presence_of_element_located((By.CSS_SELECTOR, "#password")))
             self.driver.find_element_by_css_selector("#password").send_keys(self.password)
             self.driver.find_element_by_css_selector("#dssLogin > div > button").click()
 
