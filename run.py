@@ -15,38 +15,44 @@ movie_list = [
     "Harry Potter",
     "The Wolf of Wall Street"
 ]
-
+movie_list = [
+    "The Chronicles of Narnia: The Lion, the Witch and the Wardrobe",
+    "The Chronicles of Narnia: Prince Caspian",
+    "The Chronicles of Narnia: The Voyage of the Dawn Treader",
+    "A Bug's Life",
+    "Toy Story",
+    "Toy Story 2",
+    "Toy Story 3",
+    "Mulan",
+    "Beauty and The Beast",
+    "A Goofy Movie",
+    "Hunchback of Notre Dame",
+    "Aristocats",
+    "Mickey, Donald, Goofy: The three musketeers",
+    "Pinocchio",
+    "Sleeping Beauty",
+    "The Little Mermaid",
+    "Lion King",
+    "Ice Age",
+    "Ice Age: The Meltdown",
+    "Ice Age: Dawn of the Dinosaurs",
+    "Ice Age: Continental Drift",
+    "Ice Age: Collision Course",
+    "The Incredibles",
+    "Incredibles 2",
+    "Monsters, Inc.",
+    "Monsters University",
+    "Lilo & Stitch",
+    "Finding Nemo",
+    "Finding Dory",
+    "Tarzan",
+    "Meet the Robinsons",
+    "Ratatouille",
+    "Cars",
+    "Cars 2",
+    "Cars 3"
+]
 recc = Recommendations(movie_list)
-# print(recc.get_reccs())
-recc.get_reccs()
-# print(recc.json())
-# print(recc.filter_streaming_availability(provider="Netflix"))
-keywords, exceptions = recc.get_imdb_keywords()
-count = {}
-for ele in keywords:
-    keyword = ''
-    name = ele.split(" ")
-    for thing in name:
-        if "/" not in thing:
-            keyword += f'{thing} '
-    keyword = keyword[:-1]
-    if count.get(keyword):
-        count[keyword] += 1
-    else:
-        count[keyword] = 1
-print(count)
-print(max(count.values()))
-print(len(exceptions), exceptions)
-
-res = []
-highest = max(count.values())
-
-while highest > 0:
-    for keyword in count:
-        if count[keyword] == highest:
-            res.append(f'{keyword}: {count[keyword]}')
-    highest -= 1
-
-print(res)
-
-print('top10', res[:10])
+print(recc.get_reccs())
+print(recc.json())
+print(recc.filter_streaming_availability(provider="Netflix"))
