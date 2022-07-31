@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 import os
 import requests
+from bs4 import BeautifulSoup
 
 load_dotenv()
 load_dotenv(dotenv_path=os.getcwd())
@@ -146,3 +147,102 @@ class Recommendations():
                             recc_by_avail.append(recc)
         return recc_by_avail
 
+    def __get_imdb_ids(self):
+        movie_ids = []
+        for recc in self.reccs:
+            id = recc.split(" (")[1][:-1]
+            movie_ids.append(id)
+            
+        self.__imdb_ids = []
+        for movie_id in movie_ids:
+        # for movie_id in movie_ids[:10]:
+            r = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/external_ids?api_key={TMDB_KEY}")
+            json = r.json()
+            self.__imdb_ids.append(json['imdb_id'])
+
+        # For when checking the keywords of movie_list
+        """
+        movie_ids = []
+        for recc in self.movie_ids:
+            id = self.movie_ids[recc]
+            movie_ids.append(id)
+        self.imdb_ids = []
+        for movie_id in movie_ids:
+        # for movie_id in movie_ids[:10]:
+            r = requests.get(f"https://api.themoviedb.org/3/movie/{movie_id}/external_ids?api_key={TMDB_KEY}")
+            json = r.json()
+            self.imdb_ids.append(json['imdb_id'])
+        """
+
+    def __get_imdb_keywords(self):
+        self.__get_imdb_ids()
+        res = []
+        exceptions = []
+        for imdb_id in self.__imdb_ids:
+            r = requests.get(f"https://www.imdb.com/title/{imdb_id}/keywords?ref_=tt_stry_kw")
+            soup = BeautifulSoup(r.text, 'html.parser')
+            table = soup.find(class_="dataTable evenWidthTable2Col")
+            try:
+                for row in table.find_all('tr'):
+                    for col in row.find_all('td'):
+                        item = ''
+                        for i, ele in enumerate(col):
+                            if i == 1: # Keyword
+                                for j, line in enumerate(ele):
+                                    if j == 1:
+                                        for keyword in line:
+                                            item += keyword
+                            if i == 3: # Votes
+                                for j, line in enumerate(ele):
+                                    if j == 1:
+                                        for k, ele2 in enumerate(line):
+                                            if k == 1:
+                                                for aba in ele2:
+                                                    amount = aba.split(" ")
+                                                    amount = [amount[1], amount[3]]
+                                                    # if amount[1] == '1':
+                                                    if amount[1] in ['1','2','3']: # The number in the list are the number of total votes on a keyword.
+                                                    # if amount[1] in ['1','2','3','4']:
+                                                        item = ""
+                                                    elif amount[0] == amount[1]:
+                                                        item += f' {amount[0]}/{amount[1]}'
+                                                    else:
+                                                        item = ""
+                        if len(item) > 0:
+                            res.append(item) 
+            except:
+                exceptions.append(imdb_id)
+
+        return res, exceptions
+
+    def __get_imdb_count(self):
+        """Returns an ordered top 10 list of keywords found from IMDb
+
+        Returns:
+            list of strings: "keyword: count"
+        """
+        keywords, exceptions = self.__get_imdb_keywords()
+
+        count = {}
+        for keyword in keywords:
+            temp_string = ''
+            name = keyword.split(" ")
+            for thing in name:
+                if "/" not in thing:
+                    temp_string += f'{thing} '
+            temp_string = temp_string[:-1]
+            if count.get(temp_string):
+                count[temp_string] += 1
+            else:
+                count[temp_string] = 1
+
+        self.__ordered_imdb_keyword_count = []
+        highest = max(count.values())
+
+        while highest > 0:
+            for keyword in count:
+                if count[keyword] == highest:
+                    self.__ordered_imdb_keyword_count.append(f'{keyword}: {count[keyword]}')
+            highest -= 1  
+        
+        return self.__ordered_imdb_keyword_count[:10]
