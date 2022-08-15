@@ -21,6 +21,7 @@ class Browser:
         self.driver = webdriver.Chrome('chromedriver.exe', chrome_options=options)
         self.email = email
         self.password = password
+        self.profile = None
         self.action = ActionChains(self.driver)
         self.time = time.time()
         self.url = f'https://www.disneyplus.com/movies/wd/{disney_id(movie)}'
@@ -36,6 +37,7 @@ class Browser:
             temp = open('temp.txt', 'r+').readlines()
             self.email = temp[0]
             self.password = temp[1]
+            self.profile = temp[3]
             WebDriverWait(self.driver, 15).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, "#email")))
             self.driver.find_element_by_css_selector("#email").send_keys(self.email)
@@ -49,11 +51,10 @@ class Browser:
             self.driver.get_screenshot_as_file(f'errors/{str(round(self.time))}.png')
 
     def profile(self):
-        profile = 'austin'
         WebDriverWait(self.driver, 15).until(
             EC.presence_of_element_located(
                 (By.CSS_SELECTOR, "#remove-main-padding_index > div > div > section > ul > div:nth-child(2) > div > h3")))
-        profile = self.driver.find_element_by_css_selector(f"div[aria-label='{profile}']")
+        profile = self.driver.find_element_by_css_selector(f"div[aria-label='{self.profile}']")
         self.action.move_to_element(profile).click(profile).perform()
 
     def navigate(self):
